@@ -1,0 +1,18 @@
+{
+  "author": "",
+  "name": "3",
+  "version": "0.0.0",
+  "repository": {
+    "url": ""
+  },
+  "engines": {
+    "node": ">v0.4.10"
+  },
+  "dependencies": {
+      "express": "latest",
+      "socket.io": "latest",
+      "jade": "latest",
+      "uglify-js": "latest"
+  },
+  "devDependencies": {}
+}
