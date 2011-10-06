@@ -13,9 +13,11 @@ webServer.get('/', function(req, res) {
    res.render('index'); 
 });
 
-function publishPathsToClient(socket, paths) {
-    for (var pathIndex in paths) {
-        var path = paths[pathIndex];
+paper.setup();
+
+function publishPathsToClient(socket) {
+    var path = paper.project.activeLayer.firstChild;
+    while (path) {
         var segments = [];
         for (var segmentIndex = 0, l = path.segments.length; segmentIndex < l; ++segmentIndex) {
             var segment = path.segments[segmentIndex];
@@ -28,25 +30,21 @@ function publishPathsToClient(socket, paths) {
                 oy: segment.handleOut.y,
             });
         }
-        socket.emit('add path', {id: path.pathId, segments: segments});
+        socket.emit('add path', {id: path.name, segments: segments});
+        path = path.nextSibling;
     }    
 }
 
-paper.setup();
-var pathCounter = 0;
-var paths = {};
-
 io.sockets.on('connection', function(socket) {
-    publishPathsToClient(socket, paths);
+    publishPathsToClient(socket);
     socket.on('add path', function(message) {
         var path = new paper.Path();
-        path.pathId = message.id;
-        paths[path.pathId] = path;
+        path.name = message.id;
         socket.broadcast.emit('add path', message);
     });
     socket.on('add path point', function(message) {
         if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
-        var path = paths[message.id];
+        var path = paper.project.activeLayer.children[message.id];
         if (typeof path !== 'undefined') {
             path.add(new paper.Point(message.x, message.y));
             socket.broadcast.emit('add path point', message);
@@ -54,7 +52,7 @@ io.sockets.on('connection', function(socket) {
     });
     socket.on('end path', function(message) {
         if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
-        var path = paths[message.id];
+        var path = paper.project.activeLayer.children[message.id];
         if (typeof path !== 'undefined') {
             path.simplify();
             socket.broadcast.emit('end path', message);
@@ -62,7 +60,7 @@ io.sockets.on('connection', function(socket) {
     });
     socket.on('remove path', function(message) {
         if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
-        var path = paths[message.id];
+        var path = paper.project.activeLayer.children[message.id];
         if (typeof path !== 'undefined') {
             path.remove();
             delete paths[message.id];
@@ -71,7 +69,7 @@ io.sockets.on('connection', function(socket) {
     });
     socket.on('move path', function(message) {
         if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
-        var path = paths[message.id];
+        var path = paper.project.activeLayer.children[message.id];
         if (typeof path !== 'undefined') {
             path.position.x += message.delta.x;
             path.position.y += message.delta.y;
@@ -80,7 +78,7 @@ io.sockets.on('connection', function(socket) {
     });
     socket.on('move segment', function(message) {
         if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
-        var path = paths[message.id];
+        var path = paper.project.activeLayer.children[message.id];
         if (typeof path !== 'undefined') {
             var pt = path.segments[message.segment].point;
             pt.x += message.delta.x;

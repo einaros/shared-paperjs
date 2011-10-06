@@ -1,8 +1,6 @@
 $(function() {
     var socket = io.connect();
     var buttonCounter = 0;
-    var pathCounter = 0;
-    var paths = {};
     var hitOptions = {
         segments: true,
         stroke: true,
@@ -10,8 +8,8 @@ $(function() {
         tolerance: 5
     };
 
-    function getNewPathId() {
-        return socket.socket.sessionid + '-' + (++pathCounter);
+    function getPathUniqueId(path) {
+        return socket.socket.sessionid + '-' + path.id;
     }
     
     function addButton(icon, onClick, active) {
@@ -57,34 +55,33 @@ $(function() {
             }
             else path = new paper.Path();
             path.strokeColor = 'black';
-            path.pathId = message.id;
-            paths[message.id] = path;
+            path.name = message.id;
+            paper.project.activeLayer.children[message.id] = path;
             paper.view.draw();
         });
         socket.on('add path point', function(message) {
-            var path = paths[message.id];
+            var path = paper.project.activeLayer.children[message.id];
             if (typeof path !== 'undefined') {
                 path.add(new paper.Point(message.x, message.y));
                 paper.view.draw();
             }
         });
         socket.on('end path', function(message) {
-            var path = paths[message.id];
+            var path = paper.project.activeLayer.children[message.id];
             if (typeof path !== 'undefined') {
                 path.simplify();
                 paper.view.draw();
             }
         });
         socket.on('remove path', function(message) {
-            var path = paths[message.id];
+            var path = paper.project.activeLayer.children[message.id];
             if (typeof path !== 'undefined') {
                 path.remove();
-                delete paths[message.id];
                 paper.view.draw();
             }
         });
         socket.on('move path', function(message) {
-            var path = paths[message.id];
+            var path = paper.project.activeLayer.children[message.id];
             if (typeof path !== 'undefined') {
                 path.position.x += message.delta.x;
                 path.position.y += message.delta.y;                    
@@ -92,7 +89,7 @@ $(function() {
             }
         });
         socket.on('move segment', function(message) {
-            var path = paths[message.id];
+            var path = paper.project.activeLayer.children[message.id];
             if (typeof path !== 'undefined') {
                 path.segments[message.segment].point.x += message.delta.x;
                 path.segments[message.segment].point.y += message.delta.y;                    
@@ -116,7 +113,7 @@ $(function() {
                 if (event.modifiers.shift) {
                     if (hitResult.type == 'stroke') {
                         hitResult.item.remove();
-                        socket.emit('remove path', {id: hitResult.item.pathId});
+                        socket.emit('remove path', {id: hitResult.item.name});
                     };
                     return;
                 }
@@ -128,13 +125,13 @@ $(function() {
             if (manipulateTool.target) {
                 var target = manipulateTool.target;
                 if (target.segment) {
-                    socket.emit('move segment', {id: target.item.pathId, segment: target.segment.index, delta: event.delta});
+                    socket.emit('move segment', {id: target.item.name, segment: target.segment.index, delta: event.delta});
                     target.segment.point.x += event.delta.x;
                     target.segment.point.y += event.delta.y;
                     target.item.smooth();
                 }
                 else {
-                    socket.emit('move path', {id: target.item.pathId, delta: event.delta});
+                    socket.emit('move path', {id: target.item.name, delta: event.delta});
                     target.item.position.x += event.delta.x;
                     target.item.position.y += event.delta.y;                    
                 }
@@ -145,17 +142,17 @@ $(function() {
         var paintTool = new paper.Tool();
         paintTool.onMouseDown = function(event) {
             paintTool.path = new paper.Path();
-            paintTool.path.pathId = getNewPathId();
+            paintTool.path.name = getPathUniqueId(paintTool.path);
             paintTool.path.strokeColor = 'black';
-            socket.emit('add path', {id: paintTool.path.pathId});
+            socket.emit('add path', {id: paintTool.path.name});
         }
         paintTool.onMouseDrag = function(event) {
             paintTool.path.add(event.point);
-            socket.emit('add path point', {id: paintTool.path.pathId, x: event.point.x, y: event.point.y});
+            socket.emit('add path point', {id: paintTool.path.name, x: event.point.x, y: event.point.y});
         }
         paintTool.onMouseUp = function(event) {
             paintTool.path.simplify();
-            socket.emit('end path', {id: paintTool.path.pathId});
+            socket.emit('end path', {id: paintTool.path.name});
         }
         addButton('paintbrush.png', function() { paintTool.activate(); });
     });
