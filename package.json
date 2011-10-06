@@ -1,6 +1,6 @@
 {
   "author": "einar otto stangvik <einaros@gmail.com>",
-  "name": "paper.js collaboration example",
+  "name": "shared-paperjs",
   "version": "0.0.1",
   "repository": {
     "url": "http://github.com/einaros/shared-paperjs"
