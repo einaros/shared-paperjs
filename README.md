@@ -15,6 +15,11 @@ The client additionally has a set of tools, which add or manipulate the paper.js
 Each tool send off a set of operations to the server. The server, on its end, will apply said operations
 to the local canvas, then broadcast it to the other clients.
 
+Files of interest:
+
+* Server code: /server.js
+* Client code: /public/app.js
+
 ## So .. uh .. why is this cool? ##
 
 The example in itself isn't necessarily much, but in all its simplicity, it is just that: simple. 
