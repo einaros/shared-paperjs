@@ -1,49 +1,47 @@
 $(function() {
+    var socket = io.connect();
     var buttonCounter = 0;
     var pathCounter = 0;
     var paths = {};
-    var socket = io.connect();
     var hitOptions = {
         segments: true,
         stroke: true,
         fill: true,
         tolerance: 5
     };
-    var canvas = $('canvas')[0];
 
     function getNewPathId() {
         return socket.socket.sessionid + '-' + (++pathCounter);
     }
     
-    function addButton(icon, cb) {
+    function addButton(icon, onClick, active) {
         var bt = $('<div class="button">')
+            .addClass('button')
             .css({
-                height: 16,
-                width: 16,
-                position: 'fixed',
-                top: 10 + buttonCounter * 26,
-                left: 10,
-                'background-image': 'url(' + icon + ')',
-                'background-repeat': 'no-repeat'
+                top: 10 + (buttonCounter++) * 26,
+                'background-image': 'url(' + icon + ')'
             })
             .click(function() {
-                $('.button').css({'background-color': ''});
-                $(this).css({'background-color': '#bababe'});
-                cb();
+                $('.button').removeClass('active');
+                $(this).addClass('active');
+                onClick();
             })
             .hover(function() {
-               bt.css({border: '1px solid gray'});
+                bt.css({border: '1px solid gray'});
             }, function() {
                 bt.css({border: 'none'});                
             });
+        if (active) bt.addClass('active');
         $('body').append(bt);
-        ++buttonCounter;
     }
 
-    paper.setup(canvas);
+    paper.setup($('canvas')[0]);
     paper.view.draw();
     
     socket.on('connect', function() {
+        
+        // Socket listeners follow
+        
         socket.on('add path', function(message) {
             var path;
             if (typeof message.segments !== 'undefined') {
@@ -102,6 +100,8 @@ $(function() {
             }
         });
 
+        // Tools follow
+        
         var manipulateTool = new paper.Tool();
         manipulateTool.onMouseMove = function(event) {
             var hitResult = paper.project.hitTest(event.point, hitOptions);
@@ -140,7 +140,7 @@ $(function() {
                 }
             }
         }
-        addButton('cursor.png', function() { manipulateTool.activate(); });
+        addButton('cursor.png', function() { manipulateTool.activate(); }, true);
 
         var paintTool = new paper.Tool();
         paintTool.onMouseDown = function(event) {

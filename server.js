@@ -1,43 +1,48 @@
 var paper = require('./lib/paper.js/node.js');
 var express = require('express');
-var app = express.createServer();
-var io = require('socket.io').listen(app);
+var webServer = express.createServer();
+var io = require('socket.io').listen(webServer);
 
 io.set('log level', 1);
-app.listen(8000);
-app.set('view engine', 'jade');
-app.use(express.static(__dirname + '/public'));
-app.use(express.errorHandler());
-app.use(express.bodyParser());
-app.get('/', function(req, res) {
+webServer.listen(8001);
+webServer.set('view engine', 'jade');
+webServer.use(express.static(__dirname + '/public'));
+webServer.use(express.errorHandler());
+webServer.use(express.bodyParser());
+webServer.get('/', function(req, res) {
    res.render('index'); 
 });
+
+function publishPathsToClient(socket, paths) {
+    for (var pathIndex in paths) {
+        var path = paths[pathIndex];
+        var segments = [];
+        for (var segmentIndex = 0, l = path.segments.length; segmentIndex < l; ++segmentIndex) {
+            var segment = path.segments[segmentIndex];
+            segments.push({
+                x: segment.point.x, 
+                y: segment.point.y,
+                ix: segment.handleIn.x,
+                iy: segment.handleIn.y,
+                ox: segment.handleOut.x,
+                oy: segment.handleOut.y,
+            });
+        }
+        socket.emit('add path', {id: path.pathId, segments: segments});
+    }    
+}
 
 paper.setup();
 var pathCounter = 0;
 var paths = {};
+
 io.sockets.on('connection', function(socket) {
-    for (var i in paths) {
-        var path = paths[i];
-        var segments = [];
-        for (var si = 0, l = path.segments.length; si < l; ++si) {
-            var s = path.segments[si];
-            segments.push({
-                x: s.point.x, 
-                y: s.point.y,
-                ix: s.handleIn.x,
-                iy: s.handleIn.y,
-                ox: s.handleOut.x,
-                oy: s.handleOut.y,
-            });
-        }
-        socket.emit('add path', {id: path._id, segments: segments});
-    }
+    publishPathsToClient(socket, paths);
     socket.on('add path', function(message) {
         var path = new paper.Path();
-        path._id = message.id;
-        paths[path._id] = path;
-        socket.broadcast.emit('add path', {id: path._id});
+        path.pathId = message.id;
+        paths[path.pathId] = path;
+        socket.broadcast.emit('add path', message);
     });
     socket.on('add path point', function(message) {
         if (typeof message == 'undefined' || typeof message.id == 'undefined') return;

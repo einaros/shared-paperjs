@@ -16,7 +16,14 @@ html
                 -o-user-select: none;
                 user-select: none;
             }
-            canvas {
-                cursor: pointer;
+            .button {
+                height: 16px;
+                width: 16px;
+                position: fixed;
+                left: 10px;
+                background-repeat: no-repeat;
+            }
+            .button.active {
+                background-color: #BABABE;
             }
     body!= body
