@@ -8,7 +8,9 @@ Brief example showing realtime collaborative sharing of a few paper.js tools, an
 
 ## Online demo ##
 
-http://paper.2x.io
+Connect your browser to http://paper.2x.io, and get a friend to join you. Draw a path or two, drag the paths around, then go read the (pretty simple) source.
+
+A browser which supports websockets isn't strictly required, but will absolutely yield the best sharing experience. Do note that some firewalls and proxy solutions may run into issues with communication -- if you do, feel free to add an issue on the github repo, and I'll take this further.
 
 ## Installing and running ##
 
