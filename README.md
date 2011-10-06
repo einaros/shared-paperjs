@@ -1,9 +1,10 @@
 # shared-paperjs #
 
-Brief example showing collaborative sharing of a few paper.js tools, and brief utilization of:
-- [express](http://expressjs.org)
-- [socket.io](http://socket.io)
-- [jade](http://jade-lang.com/)
+Brief example showing realtime collaborative sharing of a few paper.js tools, and brief utilization of:
+
+- [express](http://expressjs.org) 
+- [socket.io](http://socket.io) 
+- [jade](http://jade-lang.com/) 
 
 ## Installing and running ##
 
