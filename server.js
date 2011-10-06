@@ -42,7 +42,7 @@ io.sockets.on('connection', function(socket) {
     socket.on('add path point', function(message) {
         if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
         var path = paths[message.id];
-        if (typeof path !== 'undefined' && !path.ended) {
+        if (typeof path !== 'undefined') {
             path.add(new paper.Point(message.x, message.y));
             socket.broadcast.emit('add path point', message);
         }
@@ -53,6 +53,35 @@ io.sockets.on('connection', function(socket) {
         if (typeof path !== 'undefined') {
             path.simplify();
             socket.broadcast.emit('end path', message);
+        }
+    });
+    socket.on('remove path', function(message) {
+        if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
+        var path = paths[message.id];
+        if (typeof path !== 'undefined') {
+            path.remove();
+            delete paths[message.id];
+            socket.broadcast.emit('remove path', message);
+        }
+    });
+    socket.on('move path', function(message) {
+        if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
+        var path = paths[message.id];
+        if (typeof path !== 'undefined') {
+            path.position.x += message.delta.x;
+            path.position.y += message.delta.y;
+            socket.broadcast.emit('move path', message);
+        }
+    });
+    socket.on('move segment', function(message) {
+        if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
+        var path = paths[message.id];
+        if (typeof path !== 'undefined') {
+            var pt = path.segments[message.segment].point;
+            pt.x += message.delta.x;
+            pt.y += message.delta.y;
+            path.smooth();
+            socket.broadcast.emit('move segment', message);
         }
     });
 });
