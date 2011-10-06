@@ -1,9 +1,9 @@
 {
-  "author": "",
-  "name": "3",
-  "version": "0.0.0",
+  "author": "einar otto stangvik <einaros@gmail.com>",
+  "name": "paper.js collaboration example",
+  "version": "0.0.1",
   "repository": {
-    "url": ""
+    "url": "http://github.com/einaros/shared-paperjs"
   },
   "engines": {
     "node": ">v0.4.10"
@@ -12,7 +12,8 @@
       "express": "latest",
       "socket.io": "latest",
       "jade": "latest",
-      "uglify-js": "latest"
+      "uglify-js": "latest",
+      "canvas": "latest"
   },
   "devDependencies": {}
 }
