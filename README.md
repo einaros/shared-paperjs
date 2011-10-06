@@ -6,6 +6,10 @@ Brief example showing realtime collaborative sharing of a few paper.js tools, an
 - [socket.io](http://socket.io) 
 - [jade](http://jade-lang.com/) 
 
+## Online demo ##
+
+http://paper.2x.io
+
 ## Installing and running ##
 
     git clone git://github.com/einaros/shared-paperjs
