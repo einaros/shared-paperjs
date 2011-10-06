@@ -12,6 +12,7 @@ Brief example showing realtime collaborative sharing of a few paper.js tools, an
     cd shared-paperjs
     npm install
     git submodule init
+    git submodule update
     node server.js
 
 Now open a web browser to http://localhost:8001.
