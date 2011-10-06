@@ -33,14 +33,11 @@ io.sockets.on('connection', function(socket) {
         }
         socket.emit('add path', {id: path._id, segments: segments});
     }
-    socket.on('add path', function(message, callback) {
+    socket.on('add path', function(message) {
         var path = new paper.Path();
-        path._id = pathCounter;
-        pathCounter += 1;
-        paths[pathCounter] = path;
-        var pathId = paths.length;
-        callback(pathCounter);
-        socket.broadcast.emit('add path', {id: pathCounter});
+        path._id = message.id;
+        paths[path._id] = path;
+        socket.broadcast.emit('add path', {id: path._id});
     });
     socket.on('add path point', function(message) {
         if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
