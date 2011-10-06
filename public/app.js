@@ -1,4 +1,5 @@
 $(function() {
+    paper.setup($('canvas')[0]);
     var socket = io.connect();
     var buttonCounter = 0;
     var hitOptions = {
@@ -32,12 +33,8 @@ $(function() {
         if (active) bt.addClass('active');
         $('body').append(bt);
     }
-
-    paper.setup($('canvas')[0]);
-    paper.view.draw();
     
-    socket.on('connect', function() {
-        
+    socket.on('connect', function() {        
         // Socket listeners follow
         
         socket.on('add path', function(message) {
