@@ -8,7 +8,7 @@ $(function() {
         fill: true,
         tolerance: 5
     };
-
+ 
     function getPathUniqueId(path) {
         return socket.socket.sessionid + '-' + path.id;
     }
@@ -43,9 +43,9 @@ $(function() {
                 onClick();
             })
             .hover(function() {
-                bt.css({border: '1px solid gray'});
+                bt.addClass('hover');
             }, function() {
-                bt.css({border: 'none'});                
+                bt.removeClass('hover');
             });
         if (active) bt.addClass('active');
         $('body').append(bt);
@@ -129,6 +129,25 @@ $(function() {
             socket.emit('fit path', {id: this.path.name, rect: r, angle: angleDelta});
         }
         
+        var circleTool = new paper.Tool();
+        circleTool.onMouseDown = function(event) {
+            this.angle = 0;
+            this.origin = event.point;
+            this.path = new paper.Path.Circle(event.point, 1);
+            this.path.strokeColor = 'black';
+            publishNewPath(this.path);
+        }
+        circleTool.onMouseDrag = function(event) {
+            var size = event.point.subtract(this.origin);
+            var angleDelta = size.angle - this.angle;
+            this.path.rotate(angleDelta);
+            this.angle = size.angle;
+            var w = Math.abs(size.x) > Math.abs(size.y) ? size.x : size.y;
+            var r = new paper.Rectangle(this.origin.x - w, this.origin.y - w, 2*w, 2*w);
+            this.path.fitBounds(r);
+            socket.emit('fit path', {id: this.path.name, rect: r, angle: angleDelta});
+        }
+
         var rotateTool = new paper.Tool();
         rotateTool.onMouseMove = function(event) {
             var hitResult = paper.project.hitTest(event.point, hitOptions);
@@ -190,10 +209,11 @@ $(function() {
             socket.emit('fit path', {id: this.path.name, rect: r, angle: angleDelta});
         }
 
-        addButton('cursor.png', function() { manipulateTool.activate(); }, true);
-        addButton('rotate.png', function() { rotateTool.activate(); });        
-        addButton('scale.png', function() { resizeTool.activate(); });        
-        addButton('paintbrush.png', function() { paintTool.activate(); });
-        addButton('rect.png', function() { rectTool.activate(); });
+        addButton('images/cursor.png', function() { manipulateTool.activate(); }, true);
+        addButton('images/rotate.png', function() { rotateTool.activate(); });        
+        addButton('images/scale.png', function() { resizeTool.activate(); });        
+        addButton('images/paintbrush.png', function() { paintTool.activate(); });
+        addButton('images/rect.png', function() { rectTool.activate(); });
+        addButton('images/circle.png', function() { circleTool.activate(); });
     });
 });

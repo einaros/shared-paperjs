@@ -1,11 +1,7 @@
 !!! 5
 html
     head
-        script(src='/jq.js')
-        script(src='/socket.io/socket.io.js')
-        script(src='/paper.js')
-        script(src='/receiver.js')
-        script(src='/app.js')
+        <link rel="stylesheet" media="screen" type="text/css" href="colorpicker/css/colorpicker.css" />
         style
             body {
                 margin: 0px;
@@ -16,15 +12,32 @@ html
                 -moz-user-select: none;
                 -o-user-select: none;
                 user-select: none;
+                background-image: url(images/paper.jpg);
             }
             .button {
                 height: 16px;
                 width: 16px;
                 position: fixed;
                 left: 10px;
+                padding: 2px;
+                -webKit-border-radius: 3px;
+                -moz-border-radius: 3px;
+                border-radius: 3px;
                 background-repeat: no-repeat;
+                background-position: 2px 2px;
             }
             .button.active {
-                background-color: #BABABE;
+                background-color: #FFF;
+                border: 1px solid gray;
             }
+            .button.hover {
+                background-color: #FFF;
+                border: 1px solid gray;
+            }
+        script(src='jq.js')
+        script(src='socket.io/socket.io.js')
+        script(src='paper.js')
+        script(src='receiver.js')
+        script(src='app.js')
+        script(src='colorpicker/js/colorpicker.js')
     body!= body
