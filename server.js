@@ -1,19 +1,8 @@
 var paper = require('./lib/paper.js/node.js');
 var express = require('express');
+var receiver = require('./public/receiver');
 var webServer = express.createServer();
 var io = require('socket.io').listen(webServer);
-
-io.set('log level', 1);
-webServer.listen(8001);
-webServer.set('view engine', 'jade');
-webServer.use(express.static(__dirname + '/public'));
-webServer.use(express.errorHandler());
-webServer.use(express.bodyParser());
-webServer.get('/', function(req, res) {
-   res.render('index'); 
-});
-
-paper.setup();
 
 function publishPathsToClient(socket) {
     var path = paper.project.activeLayer.firstChild;
@@ -30,61 +19,29 @@ function publishPathsToClient(socket) {
                 oy: segment.handleOut.y,
             });
         }
-        socket.emit('add path', {id: path.name, segments: segments});
+        var message = {
+            id: path.name, 
+        };
+        if (segments.length > 0) {
+            message.segments = segments;
+        }
+        message.closed = path.closed;
+        socket.emit('add path', message);
         path = path.nextSibling;
     }    
 }
 
+io.set('log level', 1);
+webServer.listen(8001);
+webServer.set('view engine', 'jade');
+webServer.use(express.static(__dirname + '/public'));
+webServer.use(express.errorHandler());
+webServer.use(express.bodyParser());
+webServer.get('/', function(req, res) {
+   res.render('index'); 
+});
+paper.setup();
 io.sockets.on('connection', function(socket) {
     publishPathsToClient(socket);
-    socket.on('add path', function(message) {
-        var path = new paper.Path();
-        path.name = message.id;
-        socket.broadcast.emit('add path', message);
-    });
-    socket.on('add path point', function(message) {
-        if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
-        var path = paper.project.activeLayer.children[message.id];
-        if (typeof path !== 'undefined') {
-            path.add(new paper.Point(message.x, message.y));
-            socket.broadcast.emit('add path point', message);
-        }
-    });
-    socket.on('end path', function(message) {
-        if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
-        var path = paper.project.activeLayer.children[message.id];
-        if (typeof path !== 'undefined') {
-            path.simplify();
-            socket.broadcast.emit('end path', message);
-        }
-    });
-    socket.on('remove path', function(message) {
-        if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
-        var path = paper.project.activeLayer.children[message.id];
-        if (typeof path !== 'undefined') {
-            path.remove();
-            delete paths[message.id];
-            socket.broadcast.emit('remove path', message);
-        }
-    });
-    socket.on('move path', function(message) {
-        if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
-        var path = paper.project.activeLayer.children[message.id];
-        if (typeof path !== 'undefined') {
-            path.position.x += message.delta.x;
-            path.position.y += message.delta.y;
-            socket.broadcast.emit('move path', message);
-        }
-    });
-    socket.on('move segment', function(message) {
-        if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
-        var path = paper.project.activeLayer.children[message.id];
-        if (typeof path !== 'undefined') {
-            var pt = path.segments[message.segment].point;
-            pt.x += message.delta.x;
-            pt.y += message.delta.y;
-            path.smooth();
-            socket.broadcast.emit('move segment', message);
-        }
-    });
+    receiver.setupReceiver(paper, socket, true);
 });

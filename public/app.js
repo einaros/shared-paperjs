@@ -12,6 +12,23 @@ $(function() {
     function getPathUniqueId(path) {
         return socket.socket.sessionid + '-' + path.id;
     }
+
+    function publishNewPath(path) {
+        path.name = getPathUniqueId(path);
+        var segments = [];
+        for (var segmentIndex = 0, l = path.segments.length; segmentIndex < l; ++segmentIndex) {
+            var segment = path.segments[segmentIndex];
+            segments.push({
+                x: segment.point.x, 
+                y: segment.point.y,
+                ix: segment.handleIn.x,
+                iy: segment.handleIn.y,
+                ox: segment.handleOut.x,
+                oy: segment.handleOut.y,
+            });
+        }
+        socket.emit('add path', {id: path.name, segments: segments, closed: path.closed});
+    }
     
     function addButton(icon, onClick, active) {
         var bt = $('<div class="button">')
@@ -34,68 +51,11 @@ $(function() {
         $('body').append(bt);
     }
     
-    socket.on('connect', function() {        
+    socket.on('connect', function() {
         // Socket listeners follow
+        setupReceiver(paper, socket, false);
         
-        socket.on('add path', function(message) {
-            var path;
-            if (typeof message.segments !== 'undefined') {
-                var segments = [];
-                for (var i = 0, l = message.segments.length; i < l; ++i) {
-                    var segment = message.segments[i];
-                    segments.push(new paper.Segment(
-                        new paper.Point(segment.x, segment.y),
-                        new paper.Point(segment.ix, segment.iy),
-                        new paper.Point(segment.ox, segment.oy)));                
-                }
-                path = new paper.Path(segments);
-            }
-            else path = new paper.Path();
-            path.strokeColor = 'black';
-            path.name = message.id;
-            paper.project.activeLayer.children[message.id] = path;
-            paper.view.draw();
-        });
-        socket.on('add path point', function(message) {
-            var path = paper.project.activeLayer.children[message.id];
-            if (typeof path !== 'undefined') {
-                path.add(new paper.Point(message.x, message.y));
-                paper.view.draw();
-            }
-        });
-        socket.on('end path', function(message) {
-            var path = paper.project.activeLayer.children[message.id];
-            if (typeof path !== 'undefined') {
-                path.simplify();
-                paper.view.draw();
-            }
-        });
-        socket.on('remove path', function(message) {
-            var path = paper.project.activeLayer.children[message.id];
-            if (typeof path !== 'undefined') {
-                path.remove();
-                paper.view.draw();
-            }
-        });
-        socket.on('move path', function(message) {
-            var path = paper.project.activeLayer.children[message.id];
-            if (typeof path !== 'undefined') {
-                path.position.x += message.delta.x;
-                path.position.y += message.delta.y;                    
-                paper.view.draw();
-            }
-        });
-        socket.on('move segment', function(message) {
-            var path = paper.project.activeLayer.children[message.id];
-            if (typeof path !== 'undefined') {
-                path.segments[message.segment].point.x += message.delta.x;
-                path.segments[message.segment].point.y += message.delta.y;                    
-                paper.view.draw();
-            }
-        });
-
-        // Tools follow
-        
+        // Tools follow        
         var manipulateTool = new paper.Tool();
         manipulateTool.onMouseMove = function(event) {
             var hitResult = paper.project.hitTest(event.point, hitOptions);
@@ -114,13 +74,13 @@ $(function() {
                     };
                     return;
                 }
-                manipulateTool.target = hitResult;
+                this.target = hitResult;
             }
-            else manipulateTool.target = null;
+            else this.target = null;
         }
         manipulateTool.onMouseDrag = function(event) {
-            if (manipulateTool.target) {
-                var target = manipulateTool.target;
+            if (this.target) {
+                var target = this.target;
                 if (target.segment) {
                     socket.emit('move segment', {id: target.item.name, segment: target.segment.index, delta: event.delta});
                     target.segment.point.x += event.delta.x;
@@ -138,19 +98,70 @@ $(function() {
 
         var paintTool = new paper.Tool();
         paintTool.onMouseDown = function(event) {
-            paintTool.path = new paper.Path();
-            paintTool.path.name = getPathUniqueId(paintTool.path);
-            paintTool.path.strokeColor = 'black';
-            socket.emit('add path', {id: paintTool.path.name});
+            this.path = new paper.Path();
+            this.path.strokeColor = 'black';
+            publishNewPath(this.path);
         }
         paintTool.onMouseDrag = function(event) {
-            paintTool.path.add(event.point);
-            socket.emit('add path point', {id: paintTool.path.name, x: event.point.x, y: event.point.y});
+            this.path.add(event.point);
+            socket.emit('add path point', {id: this.path.name, x: event.point.x, y: event.point.y});
         }
         paintTool.onMouseUp = function(event) {
-            paintTool.path.simplify();
-            socket.emit('end path', {id: paintTool.path.name});
+            this.path.simplify();
+            socket.emit('end path', {id: this.path.name});
         }
         addButton('paintbrush.png', function() { paintTool.activate(); });
+
+        var rectTool = new paper.Tool();
+        rectTool.onMouseDown = function(event) {
+            this.angle = 0;
+            this.origin = event.point;
+            this.path = new paper.Path.Rectangle(event.point, new paper.Size(1, 1));
+            this.path.strokeColor = 'black';
+            publishNewPath(this.path);
+        }
+        rectTool.onMouseDrag = function(event) {
+            var size = event.point.subtract(this.origin);
+            var angleDelta = size.angle - this.angle;
+            this.path.rotate(angleDelta);
+            this.angle = size.angle;
+            var w = Math.abs(size.x) > Math.abs(size.y) ? size.x : size.y;
+            var r = new paper.Rectangle(this.origin.x - w, this.origin.y - w, 2*w, 2*w);
+            this.path.fitBounds(r);
+            socket.emit('fit path', {id: this.path.name, rect: r, angle: angleDelta});
+        }
+        addButton('rect.png', function() { rectTool.activate(); });
+        
+        var rotateTool = new paper.Tool();
+        rotateTool.onMouseMove = function(event) {
+            var hitResult = paper.project.hitTest(event.point, hitOptions);
+            paper.project.activeLayer.selected = false;
+            if (hitResult && hitResult.item) {
+                hitResult.item.selected = true;         
+            }
+        }
+        rotateTool.onMouseDown = function(event) {
+            var hitResult = paper.project.hitTest(event.point, hitOptions);
+            if (hitResult) {
+                this.target = hitResult;
+                var bounds = hitResult.item.bounds;
+                var center = new paper.Point(bounds.x, bounds.y);
+                center.x += bounds.width / 2;
+                center.y += bounds.height / 2;
+                this.origin = center;
+                this.angle = event.point.subtract(center).angle;
+            }
+            else this.target = null;
+        }
+        rotateTool.onMouseDrag = function(event) {
+            var size = event.point.subtract(this.origin);
+            var angleDelta = size.angle - this.angle;
+            this.target.item.rotate(angleDelta);
+            this.angle = size.angle;
+            socket.emit('rotate path', {id: this.target.item.name, angle: angleDelta});
+        }
+        rotateTool.onMouseUp = function(event) {
+        }
+        addButton('rotate.png', function() { rotateTool.activate(); });        
     });
 });
