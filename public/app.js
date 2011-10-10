@@ -94,7 +94,6 @@ $(function() {
                 }
             }
         }
-        addButton('cursor.png', function() { manipulateTool.activate(); }, true);
 
         var paintTool = new paper.Tool();
         paintTool.onMouseDown = function(event) {
@@ -110,7 +109,6 @@ $(function() {
             this.path.simplify();
             socket.emit('end path', {id: this.path.name});
         }
-        addButton('paintbrush.png', function() { paintTool.activate(); });
 
         var rectTool = new paper.Tool();
         rectTool.onMouseDown = function(event) {
@@ -130,7 +128,6 @@ $(function() {
             this.path.fitBounds(r);
             socket.emit('fit path', {id: this.path.name, rect: r, angle: angleDelta});
         }
-        addButton('rect.png', function() { rectTool.activate(); });
         
         var rotateTool = new paper.Tool();
         rotateTool.onMouseMove = function(event) {
@@ -143,25 +140,60 @@ $(function() {
         rotateTool.onMouseDown = function(event) {
             var hitResult = paper.project.hitTest(event.point, hitOptions);
             if (hitResult) {
-                this.target = hitResult;
-                var bounds = hitResult.item.bounds;
+                this.path = hitResult.item;
+                var bounds = this.path.bounds;
                 var center = new paper.Point(bounds.x, bounds.y);
                 center.x += bounds.width / 2;
                 center.y += bounds.height / 2;
                 this.origin = center;
                 this.angle = event.point.subtract(center).angle;
             }
-            else this.target = null;
+            else this.path = null;
         }
         rotateTool.onMouseDrag = function(event) {
             var size = event.point.subtract(this.origin);
             var angleDelta = size.angle - this.angle;
-            this.target.item.rotate(angleDelta);
+            this.path.rotate(angleDelta);
             this.angle = size.angle;
-            socket.emit('rotate path', {id: this.target.item.name, angle: angleDelta});
+            socket.emit('rotate path', {id: this.path.item.name, angle: angleDelta});
         }
-        rotateTool.onMouseUp = function(event) {
+        
+        var resizeTool = new paper.Tool();
+        resizeTool.onMouseMove = function(event) {
+            var hitResult = paper.project.hitTest(event.point, hitOptions);
+            paper.project.activeLayer.selected = false;
+            if (hitResult && hitResult.item) {
+                hitResult.item.selected = true;         
+            }
         }
+        resizeTool.onMouseDown = function(event) {
+            var hitResult = paper.project.hitTest(event.point, hitOptions);
+            if (hitResult) {
+                this.path = hitResult.item;
+                var bounds = this.path.bounds;
+                var center = new paper.Point(bounds.x, bounds.y);
+                center.x += bounds.width / 2;
+                center.y += bounds.height / 2;
+                this.origin = center;
+                this.angle = event.point.subtract(center).angle;
+            }
+            else this.path = null;
+        }
+        resizeTool.onMouseDrag = function(event) {
+            var size = event.point.subtract(this.origin);
+            var angleDelta = size.angle - this.angle;
+            this.path.rotate(angleDelta);
+            this.angle = size.angle;
+            var w = Math.abs(size.x) > Math.abs(size.y) ? size.x : size.y;
+            var r = new paper.Rectangle(this.origin.x - w, this.origin.y - w, 2*w, 2*w);
+            this.path.fitBounds(r);
+            socket.emit('fit path', {id: this.path.name, rect: r, angle: angleDelta});
+        }
+
+        addButton('cursor.png', function() { manipulateTool.activate(); }, true);
         addButton('rotate.png', function() { rotateTool.activate(); });        
+        addButton('scale.png', function() { resizeTool.activate(); });        
+        addButton('paintbrush.png', function() { paintTool.activate(); });
+        addButton('rect.png', function() { rectTool.activate(); });
     });
 });
