@@ -134,7 +134,7 @@ $(function() {
             var hitResult = paper.project.hitTest(event.point, hitOptions);
             paper.project.activeLayer.selected = false;
             if (hitResult && hitResult.item) {
-                hitResult.item.selected = true;         
+                hitResult.item.selected = true;
             }
         }
         rotateTool.onMouseDown = function(event) {
@@ -155,7 +155,7 @@ $(function() {
             var angleDelta = size.angle - this.angle;
             this.path.rotate(angleDelta);
             this.angle = size.angle;
-            socket.emit('rotate path', {id: this.path.item.name, angle: angleDelta});
+            socket.emit('rotate path', {id: this.path.name, angle: angleDelta});
         }
         
         var resizeTool = new paper.Tool();
