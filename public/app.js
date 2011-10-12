@@ -95,8 +95,8 @@ $(function() {
             this.selectBounds = new paper.Path.Rectangle(topLeft, bottomRight);
             this.selectBounds.strokeColor = 'gray';
             this.selectBounds.dashArray = [2, 2];
-
-            this.buttonContainer.move(topLeft.x, topLeft.y);
+            // Todo: 30 is a hotfix. deal properly with buttoncontainer coords.
+            this.buttonContainer.move(Math.max(0, topLeft.x), Math.max(30, topLeft.y));
         }
         selectTool.hideToolButtons = function() {
             if (this.selectBounds) this.selectBounds.remove();
