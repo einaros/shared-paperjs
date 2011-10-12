@@ -83,7 +83,7 @@
             if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
             var path = paper.project.activeLayer.children[message.id];
             if (typeof path !== 'undefined') {
-                path.rotate(message.angle);
+                path.rotate(message.angle, new paper.Point(message.center[0], message.center[1]));
                 if (isServer) socket.broadcast.emit('rotate path', message);
                 else paper.view.draw();
             }
