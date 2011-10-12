@@ -157,7 +157,7 @@ $(function() {
         }
         selectTool.onMouseUp = function(event) {
             clearInterval(this.dashIntervalId);
-            if (this.path) {
+            if (this.path && this.path.bounds) {
                 var p = this.path.bounds;
                 var x1 = p.x;
                 var x2 = p.x + p.width;
@@ -165,7 +165,8 @@ $(function() {
                 var y2 = p.y + p.height;
                 for (var i = 0, l = paper.project.activeLayer.children.length; i < l; ++i) {
                     var c = paper.project.activeLayer.children[i];
-                    if (c.position.x > x1 && c.position.x < x2 &&
+                    if (c.position &&
+                        c.position.x > x1 && c.position.x < x2 &&
                         c.position.y > y1 && c.position.y < y2) {
                         c.selected = true;
                     };
