@@ -165,7 +165,7 @@ $(function() {
                 var y2 = p.y + p.height;
                 for (var i = 0, l = paper.project.activeLayer.children.length; i < l; ++i) {
                     var c = paper.project.activeLayer.children[i];
-                    if (c.position &&
+                    if (c.segments.length &&
                         c.position.x > x1 && c.position.x < x2 &&
                         c.position.y > y1 && c.position.y < y2) {
                         c.selected = true;
