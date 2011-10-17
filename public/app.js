@@ -68,14 +68,15 @@ $(function() {
             this.buttonContainer.addButton(this.rotateButton);
             this.trashButton = new CanvasButton('images/trash.png');
             this.trashButton.onMouseUp = function(e) {
+                var pathIds = [];
                 while (paper.project.selectedItems.length > 0) {
                     var path = paper.project.selectedItems[0];
-                    var name = path.name;
-                    socket.emit('remove path', {id: name});
+                    pathIds.push(path.name);
                     path.remove();
-                    self.hideToolButtons();
-                    paper.view.draw();
                 }
+                socket.emit('remove path', {id: pathIds});
+                self.hideToolButtons();
+                paper.view.draw();
             }
             this.buttonContainer.addButton(this.trashButton);
         }
@@ -106,12 +107,14 @@ $(function() {
         selectTool.onMouseMove = function(event) {
             if (this.isInMoveMode) {
                 this.buttonContainer.moveBy(event.delta.x, event.delta.y);
+                var pathIds = [];
                 for (var i = 0, l = paper.project.selectedItems.length; i < l; ++i) {
                     var c = paper.project.selectedItems[i];
                     c.position.x += event.delta.x;
                     c.position.y += event.delta.y;
-                    socket.emit('move path', {id: c.name, delta: event.delta});
+                    pathIds.push(c.name);
                 }
+                socket.emit('move path', {id: pathIds, delta: event.delta});
                 this.selectBounds.position.x += event.delta.x;
                 this.selectBounds.position.y += event.delta.y;
             }
@@ -120,11 +123,13 @@ $(function() {
                 var angle = event.point.subtract(center).angle;
                 var angleDelta = angle - this.rotateStartAngle;
                 this.rotateStartAngle = angle;
+                var pathIds = [];
                 for (var i = 0, l = paper.project.selectedItems.length; i < l; ++i) {
                     var c = paper.project.selectedItems[i];
                     c.rotate(angleDelta, center);
-                    socket.emit('rotate path', {id: c.name, angle: angleDelta, center: [center.x, center.y]});
+                    pathIds.push(c.name);
                 }
+                socket.emit('rotate path', {id: pathIds, angle: angleDelta, center: [center.x, center.y]});
             }
         }
         selectTool.onMouseDown = function(event) {
