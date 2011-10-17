@@ -24,7 +24,7 @@
             bt.addClass('active');
             onClick();
         }
-        $('body').append(bt);
+        $('.bottom .toolbar').append(bt);
         return bt;
     }
 

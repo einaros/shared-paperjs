@@ -13,21 +13,26 @@ html
                 user-select: none;
                 background-image: url(images/paper.jpg);
             }
+            
             .toolbutton {
-                position: fixed;
-                left: 10px;
+                margin: 5px;
+                background-color: #777;
+                -webkit-border-radius: 3px;
+                -moz-border-radius: 3px;
             }
+            
             .button {
                 height: 16px;
                 width: 16px;
                 padding: 2px;
-                -webKit-border-radius: 3px;
+                -webkit-border-radius: 3px;
                 -moz-border-radius: 3px;
                 border-radius: 3px;
                 background-repeat: no-repeat;
                 background-position: 2px 2px;
                 border: 1px solid transparent;
             }
+            
             .canvasbuttoncontainer {
                 position: absolute;
                 display: -webkit-box;
@@ -39,13 +44,48 @@ html
                 -moz-border-radius: 3px;
                 border-radius: 3px;
             }
+            
             .button.active {
                 background-color: #FFF;
                 border: 1px solid gray;
             }
+            
             .button.hover {
                 background-color: #FFF;
                 border: 1px solid gray;
+            }
+            
+            .bottom {
+                position: fixed;
+                left: 0px;
+                right: 0px;
+                bottom: 0px;
+                display: -webkit-box;
+                -webkit-box-pack: center;
+                -webkit-box-align: center;
+            }
+            
+            .bottom .toolbar {
+                display: -webkit-box;
+                -webkit-box-pack: center;
+                -webkit-box-align: center;
+                -webkit-border-radius: 5px;
+                -moz-border-radius: 5px;
+                -o-border-radius: 5px;    
+                border: 1px solid rgb(125, 125, 125);
+                background-image: linear-gradient(bottom, rgb(31,31,31) 0%, rgb(56,56,56) 29%, rgb(38,38,38) 89%);
+                background-image: -o-linear-gradient(bottom, rgb(31,31,31) 0%, rgb(56,56,56) 29%, rgb(38,38,38) 89%);
+                background-image: -moz-linear-gradient(bottom, rgb(31,31,31) 0%, rgb(56,56,56) 29%, rgb(38,38,38) 89%);
+                background-image: -webkit-linear-gradient(bottom, rgb(31,31,31) 0%, rgb(56,56,56) 29%, rgb(38,38,38) 89%);
+                background-image: -ms-linear-gradient(bottom, rgb(31,31,31) 0%, rgb(56,56,56) 29%, rgb(38,38,38) 89%);
+                background-image: -webkit-gradient(
+                    linear,
+                    left bottom,
+                    left top,
+                    color-stop(0, rgb(31,31,31)),
+                    color-stop(0.29, rgb(56,56,56)),
+                    color-stop(0.89, rgb(38,38,38))
+                );
             }
         script(src='jq.js')
         script(src='socket.io/socket.io.js')
