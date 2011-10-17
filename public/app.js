@@ -207,9 +207,10 @@ $(function() {
         }
         rectTool.onMouseDrag = function(event) {
             var size = event.point.subtract(this.origin);
-            var angleDelta = size.angle - this.angle;
+            var angle = size.angle - 45;
+            var angleDelta = angle - this.angle;
+            this.angle = angle;
             this.path.rotate(angleDelta);
-            this.angle = size.angle;
             var w = Math.abs(size.x) > Math.abs(size.y) ? size.x : size.y;
             var r = new paper.Rectangle(this.origin.x - w, this.origin.y - w, 2*w, 2*w);
             this.path.fitBounds(r);
