@@ -40,22 +40,34 @@
         });
         socket.on('remove path', function(message) {
             if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
-            var path = paper.project.activeLayer.children[message.id];
-            if (typeof path !== 'undefined') {
-                path.remove();
-                if (isServer) socket.broadcast.emit('remove path', message);
-                else paper.view.draw();
+            var ids = message.id;
+            if (Object.prototype.toString.call(message.id) !== "[object Array]") {
+                ids = [message.id];
             }
+            for (var i = 0, l = ids.length; i < l; ++i) {
+                var path = paper.project.activeLayer.children[ids[i]];
+                if (typeof path !== 'undefined') {
+                    path.remove();
+                }
+            }
+            if (isServer) socket.broadcast.emit('remove path', message);
+            else paper.view.draw();
         });
         socket.on('move path', function(message) {
             if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
-            var path = paper.project.activeLayer.children[message.id];
-            if (typeof path !== 'undefined') {
-                path.position.x += message.delta.x;
-                path.position.y += message.delta.y;
-                if (isServer) socket.broadcast.emit('move path', message);
-                else paper.view.draw();
+            var ids = message.id;
+            if (Object.prototype.toString.call(message.id) !== "[object Array]") {
+                ids = [message.id];
             }
+            for (var i = 0, l = ids.length; i < l; ++i) {
+                var path = paper.project.activeLayer.children[ids[i]];
+                if (typeof path !== 'undefined') {
+                    path.position.x += message.delta.x;
+                    path.position.y += message.delta.y;
+                }
+            }
+            if (isServer) socket.broadcast.emit('move path', message);
+            else paper.view.draw();
         });
         socket.on('move segment', function(message) {
             if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
@@ -81,12 +93,18 @@
         });
         socket.on('rotate path', function(message) {
             if (typeof message == 'undefined' || typeof message.id == 'undefined') return;
-            var path = paper.project.activeLayer.children[message.id];
-            if (typeof path !== 'undefined') {
-                path.rotate(message.angle, new paper.Point(message.center[0], message.center[1]));
-                if (isServer) socket.broadcast.emit('rotate path', message);
-                else paper.view.draw();
+            var ids = message.id;
+            if (Object.prototype.toString.call(message.id) !== "[object Array]") {
+                ids = [message.id];
             }
+            for (var i = 0, l = ids.length; i < l; ++i) {
+                var path = paper.project.activeLayer.children[ids[i]];
+                if (typeof path !== 'undefined') {
+                    path.rotate(message.angle, new paper.Point(message.center[0], message.center[1]));
+                }
+            }
+            if (isServer) socket.broadcast.emit('rotate path', message);
+            else paper.view.draw();
         });
     }
 })(typeof window != 'undefined' ? window : module.exports);
