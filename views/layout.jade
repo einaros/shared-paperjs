@@ -19,6 +19,8 @@ html
                 background-color: #777;
                 -webkit-border-radius: 3px;
                 -moz-border-radius: 3px;
+                -o-border-radius: 3px;
+                border-radius: 3px;
             }
             
             .button {
@@ -27,10 +29,17 @@ html
                 padding: 2px;
                 -webkit-border-radius: 3px;
                 -moz-border-radius: 3px;
+                -o-border-radius: 3px;
                 border-radius: 3px;
                 background-repeat: no-repeat;
                 background-position: 2px 2px;
                 border: 1px solid transparent;
+                display: inline-block;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -o-user-select: none;
+                user-select: none;
             }
             
             .canvasbuttoncontainer {
@@ -40,8 +49,9 @@ html
                 display: box;
                 background: white;
                 padding: 1px;
-                -webKit-border-radius: 3px;
+                -webkit-border-radius: 3px;
                 -moz-border-radius: 3px;
+                -o-border-radius: 3px;
                 border-radius: 3px;
             }
             
@@ -60,18 +70,15 @@ html
                 left: 0px;
                 right: 0px;
                 bottom: 0px;
-                display: -webkit-box;
-                -webkit-box-pack: center;
-                -webkit-box-align: center;
+                text-align: center;
             }
             
             .bottom .toolbar {
-                display: -webkit-box;
-                -webkit-box-pack: center;
-                -webkit-box-align: center;
+                display: inline-block;
                 -webkit-border-radius: 5px;
                 -moz-border-radius: 5px;
                 -o-border-radius: 5px;    
+                border-radius: 5px;    
                 border: 1px solid rgb(125, 125, 125);
                 background-image: linear-gradient(bottom, rgb(31,31,31) 0%, rgb(56,56,56) 29%, rgb(38,38,38) 89%);
                 background-image: -o-linear-gradient(bottom, rgb(31,31,31) 0%, rgb(56,56,56) 29%, rgb(38,38,38) 89%);
@@ -86,11 +93,14 @@ html
                     color-stop(0.29, rgb(56,56,56)),
                     color-stop(0.89, rgb(38,38,38))
                 );
+                filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#1f1f1f', endColorstr='#383838');
             }
         script(src='jq.js')
         script(src='socket.io/socket.io.js')
         script(src='paper.js')
-        script(src='receiver.js')
+        script(src='modules.js')
         script(src='ui.js')
+        script(src='tools.js')
+        script(src='receiver.js')
         script(src='app.js')
     body!= body
