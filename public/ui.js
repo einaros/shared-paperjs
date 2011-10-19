@@ -1,17 +1,18 @@
 modules['ui'] = (function(exports) {
     // Todo: clean up the 'addButton' mess, and introduce tool buttons
     var buttonCounter = 0;
-    exports.addButton = function(group, icon, onClick, active) {
+    exports.addButton = function(container, group, icon, onClick, active) {
+        var groupClass = 'button-group-' + container + ' ' + group;
         var bt = $('<div class="button">')
             .addClass('button')
             .addClass('toolbutton')
-            .addClass('button-group-' + group)
+            .addClass(groupClass)
             .css({
                 top: 10 + (buttonCounter++) * 26,
                 'background-image': 'url(' + icon + ')'
             })
             .click(function() {
-                $('.button.button-group-' + group).removeClass('active');
+                $('.button.' + groupClass).removeClass('active');
                 $(this).addClass('active');
                 onClick();
             })
@@ -24,7 +25,7 @@ modules['ui'] = (function(exports) {
             bt.addClass('active');
             onClick();
         }
-        $('.bottom .toolbar').append(bt);
+        $('.bottom .bar#' + container).append(bt);
         return bt;
     }
 
