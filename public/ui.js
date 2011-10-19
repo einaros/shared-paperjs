@@ -2,7 +2,7 @@ modules['ui'] = (function(exports) {
     // Todo: clean up the 'addButton' mess, and introduce tool buttons
     var buttonCounter = 0;
     exports.addButton = function(container, group, icon, onClick, active) {
-        var groupClass = 'button-group-' + container + ' ' + group;
+        var groupClass = 'button-group-' + container + '-' + group;
         var bt = $('<div class="button">')
             .addClass('button')
             .addClass('toolbutton')
